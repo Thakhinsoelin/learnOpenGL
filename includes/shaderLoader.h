@@ -1,6 +1,7 @@
 #pragma once
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
 #include <string>
 #include <fstream>
 
@@ -59,6 +60,7 @@ public:
 	void setInt(const std::string& name, int value) const;
 	void setFloat(const std::string& name, float value) const;
 	void setVec2(const std::string& name, float v1, float v2) const;
+	void setMat4(const std::string& name, glm::mat4& trans);
     
 private:
 	void getShaderCompilationError(unsigned int shaderID, GLenum ERROR_TYPE, ShaderType type);

@@ -1,5 +1,6 @@
 #include "shaderLoader.h"
 #include <sstream>
+#include <glm/gtc/type_ptr.hpp>
 
 void shaderLoader::getShaderCompilationError(unsigned int shaderID, GLenum ERROR_TYPE, ShaderType type) {
 	int success;
@@ -151,3 +152,7 @@ void shaderLoader::setInt(const std::string& name, int value) const {
 void shaderLoader::setVec2(const std::string& name, float v1, float v2) const {
 	glUniform2f(glGetUniformLocation(shaderProgram, name.c_str()), v1, v2);
 };
+
+void shaderLoader::setMat4(const std::string& name, glm::mat4& trans) {
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, GL_FALSE, glm::value_ptr(trans));
+}
