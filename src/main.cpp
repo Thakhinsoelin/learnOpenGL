@@ -118,7 +118,18 @@ int main(void)
         1, 2, 3
     };
 
-    
+    glm::vec3 cubePositions[] = {
+        glm::vec3(0.20f, 0.30f, 0.40f),
+        glm::vec3(2.0f, 5.0f,-15.0f),
+        glm::vec3(-1.5f,-2.2f,-2.5f),
+        glm::vec3(-3.8f,-2.0f,-12.3f),
+        glm::vec3(2.4f,-0.4f,-3.5f),
+        glm::vec3(-1.7f, 3.0f,-7.5f),
+        glm::vec3(1.3f,-2.0f,-2.5f),
+        glm::vec3(1.5f, 2.0f,-2.5f),
+        glm::vec3(1.5f, 0.2f,-1.5f),
+        glm::vec3(-1.3f, 1.0f,-1.5f)
+    };
 
 	
     
@@ -178,8 +189,8 @@ int main(void)
         GL_UNSIGNED_BYTE, img.getData());
     glGenerateMipmap(GL_TEXTURE_2D);
 
-
-    Texture img2 = Texture("../assets/awesomeface.png");
+    glEnable(GL_DEPTH_TEST);
+    Texture img2 = Texture("../assets/sticker.png");
     unsigned int texture2;
     glGenTextures(1, &texture2);
     glBindTexture(GL_TEXTURE_2D, texture2);
@@ -240,23 +251,29 @@ int main(void)
 
 
     glBindVertexArray(0);
-
+    float temp = 0;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
+        double mouseX, mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+
+        // Convert mouse coordinates to 0.0 - 1.0 range (Normalized Device Coordinates)
+        // Note: mouse Y is top-down in GLFW, so we flip it
+        float normMouseX = (float)mouseX / windowWidth;
+        float normMouseY = 1.0f - ((float)mouseY / windowHeight);
         
-        
-        glm::mat4 model = glm::mat4(1.0f);
+        /*glm::mat4 model = glm::mat4(1.0f);
 		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.f), 
-            glm::vec3(0.5f, 1.0f, 0.0f));
+            glm::vec3(0.5f, 1.0f, 0.0f));*/
 
 		glm::mat4 view = glm::mat4(1.0f);
-		//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f , -3.0f));
 
 		glm::mat4 projection = glm::mat4(1.0f);
-        //projection = glm::perspective(glm::radians(45.f), (float)(800 / 600), 0.1f, 100.f);
+        projection = glm::perspective(glm::radians(60.f), (float)(800 / 700), 0.1f, 100.f);
 
         // Convert pixel coordinates (0 to 800) to OpenGL coordinates (-1 to 1)
         float openglX = (xpos / (800.0f / 2.0f)) - 1.0f;
@@ -264,7 +281,7 @@ int main(void)
 
         glClearColor(.2f, .3f, .3f, 1.f);
         //glClearColor(.0f, .0f, .0f, 1.f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//shader1.setFloat("xOffset", 0.5f);
         /*float timeValue = glfwGetTime();
@@ -280,14 +297,36 @@ int main(void)
         /*shader1.useProgram();
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);*/
         
+        
         shader1.setMat4("projection", projection);
         shader1.setMat4("view", view);
-        shader1.setMat4("model", model);
+        shader1.setVec2("mousePos", normMouseX, normMouseY);
         shader1.setFloat("rate", gArrow);
-        shader1.useProgram();
+        
         
         glBindVertexArray(VAO2);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+        for (unsigned int i = 0; i < 10; i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            if(i == 0 || i % 3 == 0)
+            {
+                model = glm::translate(model, cubePositions[i]);
+                float angle = 20.f * i * cos(glfwGetTime());
+                if (i == 0) {
+                    angle = 20.f * 1 * sin(glfwGetTime());
+                }
+                model = glm::rotate(model, glm::radians(angle),
+                    glm::vec3(1.0f, 0.3f, 0.5f));
+                shader1.setMat4("model", model);
+                shader1.useProgram();
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
+            else {
+                model = glm::translate(model, cubePositions[i]);
+                shader1.setMat4("model", model);
+                shader1.useProgram();
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
+        }
         //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 
