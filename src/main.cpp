@@ -10,10 +10,59 @@
 #include "TextureLoader.h"
 
 float gArrow = 0.2f;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+float deltaTime = 0.f;
+float lastFrame = 0.f;
+float yaw = -90.f;
+float pitch = 0.f;
+float lastX = 400, lastY = 350;
+bool firstMouse = true;
+float Zoom = 40;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    Zoom -= (float)yoffset;
+    if (Zoom < 1.0f)
+        Zoom = 1.0f;
+    if (Zoom > 45.0f)
+        Zoom = 45.0f;
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if(firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed: y ranges bottom to top
+    lastX = xpos;
+    lastY = ypos;
+    const float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(direction);
 }
 
 void processInput(GLFWwindow* window)
@@ -46,6 +95,18 @@ void processInput(GLFWwindow* window)
             gArrow = 0.f;
         }
     }
+
+    const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) *
+        cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *
+        cameraSpeed;
 }
 
 
@@ -61,6 +122,10 @@ int main(void)
       0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
     };
 
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)); // convert to radians first
+    direction.z = sin(glm::radians(yaw));
+    direction.y = sin(glm::radians(pitch));
     //float rectangle[] = {
     // 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top right
     // 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom right
@@ -131,7 +196,13 @@ int main(void)
         glm::vec3(-1.3f, 1.0f,-1.5f)
     };
 
-	
+    
+
+
+   /* glm::mat4 view = glm::mat4(1.f);
+    view = glm::lookAt(glm::vec3(0.f, 0.f, 3.f),
+                       glm::vec3(0.f, 0.f, 0.f),
+                       glm::vec3(0.f, 1.f, 0.f));*/
     
     /* Initialize the library */
     if (!glfwInit())
@@ -150,6 +221,7 @@ int main(void)
         printf("Crash at window\n");
         return -1;
     }
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
@@ -171,6 +243,8 @@ int main(void)
     glViewport(0, 0, windowWidth, windowHeight);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
@@ -190,7 +264,7 @@ int main(void)
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glEnable(GL_DEPTH_TEST);
-    Texture img2 = Texture("../assets/sticker.png");
+    Texture img2 = Texture("../assets/yz.jpg");
     unsigned int texture2;
     glGenTextures(1, &texture2);
     glBindTexture(GL_TEXTURE_2D, texture2);
@@ -199,7 +273,7 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img2.getWidth(), img2.getHeight(), 0, GL_RGBA,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img2.getWidth(), img2.getHeight(), 0, GL_RGB,
         GL_UNSIGNED_BYTE, img2.getData());
     glGenerateMipmap(GL_TEXTURE_2D);
     
@@ -256,6 +330,10 @@ int main(void)
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         processInput(window);
         double mouseX, mouseY;
         glfwGetCursorPos(window, &mouseX, &mouseY);
@@ -269,11 +347,14 @@ int main(void)
 		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.f), 
             glm::vec3(0.5f, 1.0f, 0.0f));*/
 
-		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f , -3.0f));
+        /*const float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;*/
+        glm::mat4 view;
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(60.f), (float)(800 / 700), 0.1f, 100.f);
+        projection = glm::perspective(glm::radians(Zoom), (float)(800 / 700), 0.1f, 100.f);
 
         // Convert pixel coordinates (0 to 800) to OpenGL coordinates (-1 to 1)
         float openglX = (xpos / (800.0f / 2.0f)) - 1.0f;

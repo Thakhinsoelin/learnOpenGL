@@ -20,6 +20,6 @@ void main()
 	//FragColor = texColor * brightness;
 	//FragColor = texture(texture2, screenUV);
 	//float flicker = 1.0 - (sin(time * 20.0) * 0.1);
-	FragColor = brightness * mix(texture(texture1, TexCoord),
+	FragColor = mix(texture(texture1, TexCoord),
 					texture(texture2, vec2(TexCoord.x, TexCoord.y)),rate);
 }
