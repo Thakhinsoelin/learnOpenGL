@@ -190,7 +190,7 @@ int main(void)
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glEnable(GL_DEPTH_TEST);
-    Texture img2 = Texture("../assets/sticker.png");
+    Texture img2 = Texture("../assets/porn.jpg");
     unsigned int texture2;
     glGenTextures(1, &texture2);
     glBindTexture(GL_TEXTURE_2D, texture2);
@@ -198,8 +198,10 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img2.getWidth(), img2.getHeight(), 0, GL_RGBA,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img2.getWidth(), img2.getHeight(), 0, GL_RGB,
         GL_UNSIGNED_BYTE, img2.getData());
     glGenerateMipmap(GL_TEXTURE_2D);
     
