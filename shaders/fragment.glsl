@@ -2,8 +2,8 @@
 out vec4 FragColor;
 
 
-in vec2 TexCoord;
-in vec2 ScreenUV;
+//in vec2 TexCoord;
+//in vec2 ScreenUV;
 uniform sampler2D texture1;
 uniform sampler2D texture2;
 uniform float rate;
