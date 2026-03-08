@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-
+#include <glad/glad.h>
 class Texture
 {
 public:
@@ -25,6 +25,7 @@ public:
 	const unsigned char* getData() {
 		return data;
 	}
+	static unsigned int loadTexture(char const* path);
 private:
 	unsigned int width;
 	unsigned int height;
