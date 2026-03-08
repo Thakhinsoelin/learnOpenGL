@@ -1,7 +1,6 @@
 #include "Model.h"
 #include "TextureLoader.h"
 #include <iostream>
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureS> textures) {
