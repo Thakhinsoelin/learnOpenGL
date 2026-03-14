@@ -6,6 +6,10 @@
 #include <fstream>
 #include <sstream>
 
+#include <windows.h>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
+
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -27,6 +31,8 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+bool gSoundPlaying = false;
 
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
@@ -64,6 +70,23 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS )
+    {
+        if (gSoundPlaying == false)
+        {
+            PlaySound(TEXT("../assets/ba_shooting_star.wav"), NULL, SND_FILENAME | SND_ASYNC);
+			printf("playing song\n");   
+            gSoundPlaying = true;
+			Sleep(100); // Add a small delay to prevent rapid toggling
+        }
+        else if(gSoundPlaying == true) {
+            PlaySound(NULL, NULL, 0);
+            gSoundPlaying = false;
+			printf("stopping song\n");
+            Sleep(100);
+        }
+    }
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -141,7 +164,7 @@ int main(void)
 	shaderLoader modelShader("../shaders/model.vertex.glsl", "../shaders/model.fragment.glsl");
 	modelShader.createShaders(BOTH_FROM_FILE);
 
-    Model ourModel("../assets/Donuts.obj");
+    Model ourModel("../assets/backpack/backpack.obj");
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
