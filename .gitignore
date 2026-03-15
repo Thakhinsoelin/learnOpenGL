@@ -10,7 +10,7 @@ backpack.zip
 *.user
 *.userosscache
 *.sln.docstates
-
+*.webm
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
