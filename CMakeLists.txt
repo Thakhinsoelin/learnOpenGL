@@ -43,16 +43,39 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
     src/*.c
 )
 
+add_library(imgui_static STATIC 
+    ${CMAKE_SOURCE_DIR}/Dependencies/imgui/imgui.cpp
+    ${CMAKE_SOURCE_DIR}/Dependencies/imgui/imgui_demo.cpp
+    ${CMAKE_SOURCE_DIR}/Dependencies/imgui/imgui_draw.cpp
+    ${CMAKE_SOURCE_DIR}/Dependencies/imgui/imgui_tables.cpp
+    ${CMAKE_SOURCE_DIR}/Dependencies/imgui/imgui_widgets.cpp
+    ${CMAKE_SOURCE_DIR}/Dependencies/imgui/imgui_impl_glfw.cpp
+    ${CMAKE_SOURCE_DIR}/Dependencies/imgui/imgui_impl_opengl3.cpp
+)
+
+target_include_directories(imgui_static PUBLIC
+    ${CMAKE_SOURCE_DIR}/Dependencies/imgui
+)
+
+target_link_libraries(imgui_static PRIVATE
+    glfw
+    OpenGL::GL
+)
+target_compile_definitions(imgui_static PRIVATE GLFW_INCLUDE_NONE)
+
+
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Include your own headers
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/includes
+    ${CMAKE_SOURCE_DIR}/imgui
 )
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
     assimp
+    imgui_static
     glfw
     glm::glm
     OpenGL::GL
